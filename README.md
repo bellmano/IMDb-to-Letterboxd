@@ -1,4 +1,4 @@
-# :clapper: IMDb to Letterboxd Extension
+# :clapper: IMDb to Letterboxd
 
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=bellmano_IMDb-to-Letterboxd_extension&metric=coverage)](https://sonarcloud.io/summary/overall?id=bellmano_IMDb-to-Letterboxd_extension)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=bellmano_IMDb-to-Letterboxd_extension&metric=security_rating)](https://sonarcloud.io/summary/overall?id=bellmano_IMDb-to-Letterboxd_extension)
