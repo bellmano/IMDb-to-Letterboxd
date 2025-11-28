@@ -1,4 +1,4 @@
-# Privacy Policy for IMDb to Letterboxd Extension
+# Privacy Policy for IMDb to Letterboxd
 
 The **IMDb to Letterboxd** extension respects your privacy. We do not collect, store, or share any personal information from users.
 

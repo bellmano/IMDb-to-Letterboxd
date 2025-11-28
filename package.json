@@ -1,5 +1,5 @@
 {
-  "name": "imdb-to-letterboxd-extension",
+  "name": "imdb-to-letterboxd",
   "version": "1.0.0",
   "description": "Browser extension that allows you to quickly navigate from an IMDb movie page to the corresponding Letterboxd page with one click",
   "scripts": {

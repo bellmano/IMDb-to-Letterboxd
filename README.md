@@ -1,12 +1,12 @@
 # :clapper: IMDb to Letterboxd
 
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=bellmano_IMDb-to-Letterboxd_extension&metric=coverage)](https://sonarcloud.io/summary/overall?id=bellmano_IMDb-to-Letterboxd_extension)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=bellmano_IMDb-to-Letterboxd_extension&metric=security_rating)](https://sonarcloud.io/summary/overall?id=bellmano_IMDb-to-Letterboxd_extension)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=bellmano_IMDb-to-Letterboxd_extension&metric=sqale_rating)](https://sonarcloud.io/summary/overall?id=bellmano_IMDb-to-Letterboxd_extension)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=bellmano_IMDb-to-Letterboxd_extension&metric=reliability_rating)](https://sonarcloud.io/summary/overall?id=bellmano_IMDb-to-Letterboxd_extension)
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=bellmano_IMDb-to-Letterboxd_extension&metric=bugs)](https://sonarcloud.io/summary/overall?id=bellmano_IMDb-to-Letterboxd_extension)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=bellmano_IMDb-to-Letterboxd_extension&metric=vulnerabilities)](https://sonarcloud.io/summary/overall?id=bellmano_IMDb-to-Letterboxd_extension)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=bellmano_IMDb-to-Letterboxd_extension&metric=code_smells)](https://sonarcloud.io/summary/overall?id=bellmano_IMDb-to-Letterboxd_extension)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=bellmano_IMDb-to-Letterboxd&metric=coverage)](https://sonarcloud.io/summary/overall?id=bellmano_IMDb-to-Letterboxd)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=bellmano_IMDb-to-Letterboxd&metric=security_rating)](https://sonarcloud.io/summary/overall?id=bellmano_IMDb-to-Letterboxd)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=bellmano_IMDb-to-Letterboxd&metric=sqale_rating)](https://sonarcloud.io/summary/overall?id=bellmano_IMDb-to-Letterboxd)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=bellmano_IMDb-to-Letterboxd&metric=reliability_rating)](https://sonarcloud.io/summary/overall?id=bellmano_IMDb-to-Letterboxd)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=bellmano_IMDb-to-Letterboxd&metric=bugs)](https://sonarcloud.io/summary/overall?id=bellmano_IMDb-to-Letterboxd)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=bellmano_IMDb-to-Letterboxd&metric=vulnerabilities)](https://sonarcloud.io/summary/overall?id=bellmano_IMDb-to-Letterboxd)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=bellmano_IMDb-to-Letterboxd&metric=code_smells)](https://sonarcloud.io/summary/overall?id=bellmano_IMDb-to-Letterboxd)
 
 Browser extension that allows you to quickly navigate from an IMDb movie page to the corresponding Letterboxd page with one click.
 
@@ -42,7 +42,7 @@ To run the tests and view coverage:
 This will execute the tests and generate a coverage report.
 
 ## :mega: Issues or Suggestions
-Any issues or suggestions, please [create an issue on Github](https://github.com/bellmano/IMDb-to-Letterboxd_extension/issues).
+Any issues or suggestions, please [create an issue on Github](https://github.com/bellmano/IMDb-to-Letterboxd/issues).
 
 ## :coffee: Buy me a coffee
 Donations are welcome to appreciate my work to keep this addon alive, but isn't required at all.
