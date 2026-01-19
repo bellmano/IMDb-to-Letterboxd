@@ -41,6 +41,10 @@ To run the tests and view coverage:
 
 This will execute the tests and generate a coverage report.
 
+## :handshake: Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
 ## :mega: Issues or Suggestions
 Any issues or suggestions, please [create an issue on Github](https://github.com/bellmano/IMDb-to-Letterboxd/issues).
 
