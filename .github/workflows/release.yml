@@ -1,0 +1,158 @@
+name: Release / Deploy
+
+on:
+  workflow_dispatch
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Sanity check – the full test suite is also run in the CI workflow on every push/PR.
+      - name: Test
+        run: npm test
+
+      - name: Read version
+        id: version
+        run: |
+          VERSION=$(cat semver.txt)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      # Build Chrome / Edge zip (uses manifest.json as-is)
+      - name: Package Chrome / Edge extension
+        run: |
+          STAGING=${{ runner.temp }}/chrome-edge
+          mkdir -p "$STAGING"
+          cp src/manifest.json "$STAGING/manifest.json"
+          cp src/background.js "$STAGING/background.js"
+          cp -r src/icons "$STAGING/icons"
+          cd "$STAGING"
+          zip -r "${{ runner.temp }}/IMDb-to-Letterboxd-chrome-edge-v.${{ steps.version.outputs.version }}.zip" .
+
+      # Build Firefox zip (renames manifest.firefox.json → manifest.json)
+      - name: Package Firefox extension
+        run: |
+          STAGING=${{ runner.temp }}/firefox
+          mkdir -p "$STAGING"
+          cp src/manifest.firefox.json "$STAGING/manifest.json"
+          cp src/background.js "$STAGING/background.js"
+          cp -r src/icons "$STAGING/icons"
+          cd "$STAGING"
+          zip -r "${{ runner.temp }}/IMDb-to-Letterboxd-firefox-v.${{ steps.version.outputs.version }}.zip" .
+
+      # ── Publish to Chrome Web Store (direct API) ──
+      - name: Upload to Chrome Web Store
+        env:
+          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+          CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+          CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+        run: |
+          ZIP="${{ runner.temp }}/IMDb-to-Letterboxd-chrome-edge-v.${{ steps.version.outputs.version }}.zip"
+
+          # 1. Obtain access token from refresh token
+          TOKEN=$(curl -s -X POST https://oauth2.googleapis.com/token \
+            -d "client_id=$CHROME_CLIENT_ID" \
+            -d "client_secret=$CHROME_CLIENT_SECRET" \
+            -d "refresh_token=$CHROME_REFRESH_TOKEN" \
+            -d "grant_type=refresh_token" | jq -r '.access_token')
+
+          # 2. Upload zip to existing extension
+          curl -s -X PUT \
+            "https://www.googleapis.com/upload/chromewebstore/v1.1/items/$CHROME_EXTENSION_ID" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "x-goog-api-version: 2" \
+            -T "$ZIP"
+
+          # 3. Publish the uploaded extension
+          curl -s -X POST \
+            "https://www.googleapis.com/chromewebstore/v1.1/items/$CHROME_EXTENSION_ID/publish" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "x-goog-api-version: 2" \
+            -H "Content-Length: 0"
+
+      # Publish to Microsoft Edge Add-ons (direct API)
+      - name: Upload to Edge Add-ons
+        env:
+          EDGE_PRODUCT_ID: ${{ secrets.EDGE_PRODUCT_ID }}
+          EDGE_CLIENT_ID: ${{ secrets.EDGE_CLIENT_ID }}
+          EDGE_CLIENT_SECRET: ${{ secrets.EDGE_CLIENT_SECRET }}
+          EDGE_ACCESS_TOKEN_URL: ${{ secrets.EDGE_ACCESS_TOKEN_URL }}
+        run: |
+          ZIP="${{ runner.temp }}/IMDb-to-Letterboxd-chrome-edge-v.${{ steps.version.outputs.version }}.zip"
+
+          # 1. Obtain access token
+          TOKEN=$(curl -s -X POST "$EDGE_ACCESS_TOKEN_URL" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "client_id=$EDGE_CLIENT_ID" \
+            -d "client_secret=$EDGE_CLIENT_SECRET" \
+            -d "scope=https://api.addons.microsoftedge.microsoft.com/.default" \
+            -d "grant_type=client_credentials" | jq -r '.access_token')
+
+          # 2. Upload package to draft submission
+          curl -s -X POST \
+            "https://api.addons.microsoftedge.microsoft.com/v1/products/$EDGE_PRODUCT_ID/submissions/draft/package" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/zip" \
+            --data-binary @"$ZIP"
+
+          # 3. Publish the submission
+          curl -s -X POST \
+            "https://api.addons.microsoftedge.microsoft.com/v1/products/$EDGE_PRODUCT_ID/submissions" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"notes":""}'
+
+      # ── Publish to Firefox Add-ons (AMO direct API) ──
+      - name: Upload to Firefox Add-ons
+        env:
+          FIREFOX_EXTENSION_ID: ${{ secrets.FIREFOX_EXTENSION_ID }}
+          FIREFOX_API_KEY: ${{ secrets.FIREFOX_API_KEY }}
+          FIREFOX_API_SECRET: ${{ secrets.FIREFOX_API_SECRET }}
+        run: |
+          ZIP="${{ runner.temp }}/IMDb-to-Letterboxd-firefox-v.${{ steps.version.outputs.version }}.zip"
+          VERSION="${{ steps.version.outputs.version }}"
+
+          # 1. Generate a JWT for AMO authentication
+          NOW=$(date +%s)
+          HEADER=$(echo -n '{"alg":"HS256","typ":"JWT"}' | base64 -w0 | tr '+/' '-_' | tr -d '=')
+          PAYLOAD=$(echo -n "{\"iss\":\"$FIREFOX_API_KEY\",\"jti\":$(uuidgen),\"iat\":$NOW,\"exp\":$(( NOW + 300 ))}" | base64 -w0 | tr '+/' '-_' | tr -d '=')
+          SIGNATURE=$(echo -n "$HEADER.$PAYLOAD" | openssl dgst -sha256 -hmac "$FIREFOX_API_SECRET" -binary | base64 -w0 | tr '+/' '-_' | tr -d '=')
+          JWT="$HEADER.$PAYLOAD.$SIGNATURE"
+
+          # 2. Upload the new version
+          RESPONSE=$(curl -s -X PUT \
+            "https://addons.mozilla.org/api/v5/addons/$FIREFOX_EXTENSION_ID/versions/$VERSION/" \
+            -H "Authorization: JWT $JWT" \
+            -F "upload=@$ZIP" \
+            -F "channel=listed")
+          echo "$RESPONSE" | jq .
+
+      # GitHub Release with both zips attached
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: v${{ steps.version.outputs.version }}
+          draft: false
+          prerelease: false
+          files: |
+            ${{ runner.temp }}/IMDb-to-Letterboxd-chrome-edge-v.${{ steps.version.outputs.version }}.zip
+            ${{ runner.temp }}/IMDb-to-Letterboxd-firefox-v.${{ steps.version.outputs.version }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
