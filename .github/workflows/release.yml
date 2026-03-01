@@ -23,9 +23,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Sanity check – the full test suite is also run in the CI workflow on every push/PR.
-      - name: Test
-        run: npm test
+      - name: Run tests with coverage
+        run: npm run test:coverage
 
       - name: Read version
         id: version
@@ -55,7 +54,7 @@ jobs:
           cd "$STAGING"
           zip -r "${{ runner.temp }}/IMDb-to-Letterboxd-firefox-v.${{ steps.version.outputs.version }}.zip" .
 
-      # ── Publish to Chrome Web Store (direct API) ──
+      # Publish to Chrome Web Store (direct API)
       - name: Upload to Chrome Web Store
         env:
           CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
@@ -106,26 +105,26 @@ jobs:
 
           # 2. Upload package to draft submission
           curl -s -X POST \
-            "https://api.addons.microsoftedge.microsoft.com/v1/products/$EDGE_PRODUCT_ID/submissions/draft/package" \
+            "https://api.addons.microsoftedge.microsoft.com/v1.1/products/$EDGE_PRODUCT_ID/submissions/draft/package" \
             -H "Authorization: Bearer $TOKEN" \
             -H "Content-Type: application/zip" \
             --data-binary @"$ZIP"
 
           # 3. Publish the submission
           curl -s -X POST \
-            "https://api.addons.microsoftedge.microsoft.com/v1/products/$EDGE_PRODUCT_ID/submissions" \
+            "https://api.addons.microsoftedge.microsoft.com/v1.1/products/$EDGE_PRODUCT_ID/submissions" \
             -H "Authorization: Bearer $TOKEN" \
             -H "Content-Type: application/json" \
             -d '{"notes":""}'
 
-      # ── Publish to Firefox Add-ons (AMO direct API) ──
+      # Publish to Firefox Add-ons (AMO direct API)
       - name: Upload to Firefox Add-ons
         env:
-          FIREFOX_EXTENSION_ID: ${{ secrets.FIREFOX_EXTENSION_ID }}
           FIREFOX_API_KEY: ${{ secrets.FIREFOX_API_KEY }}
           FIREFOX_API_SECRET: ${{ secrets.FIREFOX_API_SECRET }}
         run: |
           ZIP="${{ runner.temp }}/IMDb-to-Letterboxd-firefox-v.${{ steps.version.outputs.version }}.zip"
+          ADDON_ID="imdb-to-letterboxd_webextension@github.com"
           VERSION="${{ steps.version.outputs.version }}"
 
           # 1. Generate a JWT for AMO authentication
@@ -135,13 +134,42 @@ jobs:
           SIGNATURE=$(echo -n "$HEADER.$PAYLOAD" | openssl dgst -sha256 -hmac "$FIREFOX_API_SECRET" -binary | base64 -w0 | tr '+/' '-_' | tr -d '=')
           JWT="$HEADER.$PAYLOAD.$SIGNATURE"
 
-          # 2. Upload the new version
-          RESPONSE=$(curl -s -X PUT \
-            "https://addons.mozilla.org/api/v5/addons/$FIREFOX_EXTENSION_ID/versions/$VERSION/" \
+          # 2. Upload the xpi/zip for validation
+          UPLOAD_RESPONSE=$(curl -s -X POST \
+            "https://addons.mozilla.org/api/v5/addons/upload/" \
             -H "Authorization: JWT $JWT" \
             -F "upload=@$ZIP" \
             -F "channel=listed")
-          echo "$RESPONSE" | jq .
+          echo "Upload response:" && echo "$UPLOAD_RESPONSE" | jq .
+          UPLOAD_UUID=$(echo "$UPLOAD_RESPONSE" | jq -r '.uuid')
+
+          # 3. Poll until validation completes
+          for i in $(seq 1 30); do
+            sleep 10
+            STATUS=$(curl -s \
+              "https://addons.mozilla.org/api/v5/addons/upload/$UPLOAD_UUID/" \
+              -H "Authorization: JWT $JWT")
+            VALID=$(echo "$STATUS" | jq -r '.valid')
+            PROCESSED=$(echo "$STATUS" | jq -r '.processed')
+            echo "Poll $i: processed=$PROCESSED valid=$VALID"
+            if [ "$PROCESSED" = "true" ]; then
+              if [ "$VALID" = "true" ]; then
+                echo "Validation passed!"
+                break
+              else
+                echo "Validation failed:" && echo "$STATUS" | jq .
+                exit 1
+              fi
+            fi
+          done
+
+          # 4. Create the new version from the validated upload
+          RESPONSE=$(curl -s -X POST \
+            "https://addons.mozilla.org/api/v5/addons/addon/$ADDON_ID/versions/" \
+            -H "Authorization: JWT $JWT" \
+            -H "Content-Type: application/json" \
+            -d "{\"upload\":\"$UPLOAD_UUID\"}")
+          echo "Create version response:" && echo "$RESPONSE" | jq .
 
       # GitHub Release with both zips attached
       - name: Create GitHub Release
