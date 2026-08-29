@@ -25,7 +25,7 @@ describe('Main Script Tests', () => {
     // Test chrome.action.onClicked listener
     
     // Test successful IMDb URL processing
-    const mockTab = { id: 1, url: 'https://www.imdb.com/title/tt1234567/' };
+    const mockTab = { id: 1, url: 'https://imdb.com/title/tt1234567/' };
     onClickedListener(mockTab);
     expect(chrome.tabs.create).toHaveBeenCalledWith({
       url: 'https://letterboxd.com/imdb/tt1234567/'
@@ -33,7 +33,7 @@ describe('Main Script Tests', () => {
 
     // Test URL with parameters
     jest.clearAllMocks();
-    mockTab.url = 'https://www.imdb.com/title/tt9876543/?ref_=nv_sr_srsg_0';
+    mockTab.url = 'https://imdb.com/title/tt9876543/?ref_=nv_sr_srsg_0';
     onClickedListener(mockTab);
     expect(chrome.tabs.create).toHaveBeenCalledWith({
       url: 'https://letterboxd.com/imdb/tt9876543/'
@@ -41,7 +41,7 @@ describe('Main Script Tests', () => {
 
     // Test non-IMDb URL (should not create tab)
     jest.clearAllMocks();
-    mockTab.url = 'https://www.google.com';
+    mockTab.url = 'https://google.com';
     onClickedListener(mockTab);
     expect(chrome.tabs.create).not.toHaveBeenCalled();
 
@@ -53,7 +53,7 @@ describe('Main Script Tests', () => {
 
     // Test invalid IMDb ID extraction
     jest.clearAllMocks();
-    mockTab.url = 'https://www.imdb.com/title/invalid-id/';
+    mockTab.url = 'https://imdb.com/title/invalid-id/';
     onClickedListener(mockTab);
     expect(console.error).toHaveBeenCalledWith('Could not extract IMDb ID from the URL.');
     expect(chrome.tabs.create).not.toHaveBeenCalled();
@@ -63,7 +63,7 @@ describe('Main Script Tests', () => {
     chrome.tabs.create.mockImplementation(() => {
       throw new Error('Test error');
     });
-    mockTab.url = 'https://www.imdb.com/title/tt1234567/';
+    mockTab.url = 'https://imdb.com/title/tt1234567/';
     onClickedListener(mockTab);
     expect(console.error).toHaveBeenCalledWith('Error processing IMDb page:', expect.any(Error));
 
@@ -72,12 +72,12 @@ describe('Main Script Tests', () => {
 
     // Test URL change to IMDb page - covers updateActionState and isImdbMoviePage
     jest.clearAllMocks();
-    onUpdatedListener(1, { url: 'https://www.imdb.com/title/tt1234567/' }, {});
+    onUpdatedListener(1, { url: 'https://imdb.com/title/tt1234567/' }, {});
     expect(chrome.action.enable).toHaveBeenCalledWith(1);
 
     // Test URL change to non-IMDb page - covers updateActionState else branch
     jest.clearAllMocks();
-    onUpdatedListener(1, { url: 'https://www.google.com' }, {});
+    onUpdatedListener(1, { url: 'https://google.com' }, {});
     expect(chrome.action.disable).toHaveBeenCalledWith(1);
 
     // Test no URL change - covers the if condition check
@@ -88,20 +88,16 @@ describe('Main Script Tests', () => {
 
     // Test with various URL formats to cover all branches
     jest.clearAllMocks();
-    onUpdatedListener(1, { url: 'https://www.imdb.com/title/tt0111161' }, {}); // without trailing slash
+    onUpdatedListener(1, { url: 'https://imdb.com/title/tt0111161' }, {}); // without trailing slash
     expect(chrome.action.enable).toHaveBeenCalledWith(1);
     
     jest.clearAllMocks();
-    onUpdatedListener(1, { url: 'https://www.imdb.com/title/tt0111161/' }, {}); // with trailing slash
+    onUpdatedListener(1, { url: 'https://imdb.com/title/tt0111161/' }, {}); // with trailing slash
     expect(chrome.action.enable).toHaveBeenCalledWith(1);
     
     jest.clearAllMocks();
-    onUpdatedListener(1, { url: 'https://www.imdb.com/title/tt0111161/?ref=test' }, {}); // with parameters
+    onUpdatedListener(1, { url: 'https://imdb.com/title/tt0111161/?ref=test' }, {}); // with parameters
     expect(chrome.action.enable).toHaveBeenCalledWith(1);
-    
-    jest.clearAllMocks();
-    onUpdatedListener(1, { url: 'https://imdb.com/title/tt0111161/' }, {}); // without www
-    expect(chrome.action.disable).toHaveBeenCalledWith(1);
     
     jest.clearAllMocks();
     onUpdatedListener(1, { url: null }, {}); // null URL -> should not trigger updateActionState
@@ -111,7 +107,7 @@ describe('Main Script Tests', () => {
     // Test activation with IMDb page
     jest.clearAllMocks();
     chrome.tabs.get.mockImplementation((tabId, callback) => {
-      callback({ id: 1, url: 'https://www.imdb.com/title/tt1234567/' });
+      callback({ id: 1, url: 'https://imdb.com/title/tt1234567/' });
     });
     onActivatedListener({ tabId: 1 });
     expect(chrome.tabs.get).toHaveBeenCalledWith(1, expect.any(Function));
@@ -120,7 +116,7 @@ describe('Main Script Tests', () => {
     // Test activation with non-IMDb page
     jest.clearAllMocks();
     chrome.tabs.get.mockImplementation((tabId, callback) => {
-      callback({ id: 1, url: 'https://www.google.com' });
+      callback({ id: 1, url: 'https://google.com' });
     });
     onActivatedListener({ tabId: 1 });
     expect(chrome.action.disable).toHaveBeenCalledWith(1);
@@ -135,9 +131,9 @@ describe('Main Script Tests', () => {
 
     // Test startup tab query callback
     const mockTabs = [
-      { id: 1, url: 'https://www.imdb.com/title/tt1234567/' },
-      { id: 2, url: 'https://www.google.com' },
-      { id: 3, url: 'https://www.imdb.com/title/tt9876543/' }
+      { id: 1, url: 'https://imdb.com/title/tt1234567/' },
+      { id: 2, url: 'https://google.com' },
+      { id: 3, url: 'https://imdb.com/title/tt9876543/' }
     ];
     
     jest.clearAllMocks();

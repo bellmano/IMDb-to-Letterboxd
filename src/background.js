@@ -23,7 +23,7 @@ chrome.action.onClicked.addListener(async (tab) => {
 
 // Helper function to check if a URL is an IMDb movie page
 function isImdbMoviePage(url) {
-  return url?.match(/^https:\/\/www\.imdb\.com\/title\/tt\d+/);
+  return url?.match(/^https:\/\/imdb\.com\/title\/tt\d+/);
 }
 
 // Enable or disable the action button based on the tab's URL

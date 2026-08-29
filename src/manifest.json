@@ -4,7 +4,7 @@
   "version": "1.2.2",
   "description": "Quickly navigate from an IMDb movie page to the corresponding Letterboxd page with one click.",
   "permissions": ["tabs"],
-  "host_permissions": ["https://www.imdb.com/*"],
+  "host_permissions": ["https://imdb.com/*"],
   "background": {
     "service_worker": "background.js"
   },

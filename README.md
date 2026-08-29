@@ -22,7 +22,7 @@ Browser extension that allows you to quickly navigate from an IMDb movie page to
 
 ## :movie_camera: Usage
 
-1. Navigate to any IMDb movie page (e.g., `https://www.imdb.com/title/tt0455944` for "The Equalizer").
+1. Navigate to any IMDb movie page (e.g., `https://imdb.com/title/tt0455944` for "The Equalizer").
 2. Click the IMDb to Letterboxd extension icon in your browser toolbar.
 3. You will be redirected to the corresponding Letterboxd page for that movie (e.g., `https://letterboxd.com/film/the-equalizer`).
 
