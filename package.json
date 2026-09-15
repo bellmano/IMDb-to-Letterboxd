@@ -4,11 +4,14 @@
   "description": "Browser extension that allows you to quickly navigate from an IMDb movie page to the corresponding Letterboxd page with one click",
   "scripts": {
     "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
     "jest": "^30.5.1",
-    "jest-environment-jsdom": "^30.5.1"
+    "jest-environment-jsdom": "^30.5.1",
+    "prettier": "^3.9.6"
   },
   "jest": {
     "testEnvironment": "jsdom",
@@ -16,8 +19,14 @@
       "src/background.js"
     ],
     "coverageDirectory": "coverage",
-    "coverageReporters": ["text", "lcov", "html"],
-    "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"],
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/tests/setup.js"
+    ],
     "coveragePathIgnorePatterns": [
       "/node_modules/",
       "/tests/"

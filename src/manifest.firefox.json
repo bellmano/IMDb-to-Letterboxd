@@ -1,24 +1,24 @@
 {
-    "manifest_version": 3,
-    "name": "IMDb to Letterboxd",
-    "version": "1.2.2",
-    "description": "Quickly navigate from an IMDb movie page to the corresponding Letterboxd page with one click.",
-    "permissions": ["tabs"],
-    "host_permissions": ["https://imdb.com/*"],
-    "background": {
-      "scripts": ["background.js"]
-    },
-    "action": {
-      "default_title": "Go to the Letterboxd page for this movie"
-    },
-    "icons": {
-      "16": "icons/icon-16x16.png",
-      "48": "icons/icon-48x48.png",
-      "128": "icons/icon-128x128.png"
-    },
-    "browser_specific_settings": {
-      "gecko": {
-        "id": "imdb-to-letterboxd_webextension@github.com"
-      }
+  "manifest_version": 3,
+  "name": "IMDb to Letterboxd",
+  "version": "1.2.2",
+  "description": "Quickly navigate from an IMDb movie page to the corresponding Letterboxd page with one click.",
+  "permissions": ["tabs"],
+  "host_permissions": ["https://imdb.com/*"],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "action": {
+    "default_title": "Go to the Letterboxd page for this movie"
+  },
+  "icons": {
+    "16": "icons/icon-16x16.png",
+    "48": "icons/icon-48x48.png",
+    "128": "icons/icon-128x128.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "imdb-to-letterboxd_webextension@github.com"
     }
+  }
 }
